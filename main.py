@@ -87,7 +87,7 @@ def _require_config() -> None:
 
 def _build_tools() -> list[dict[str, Any]]:
     tools: list[dict[str, Any]] = []
-    if BITRIX_MCP_URL:
+    if BITRIX_MCP_URL and BITRIX_MCP_URL not in ("*",):
         tools.append(
             {
                 "type": "mcp",
@@ -97,11 +97,13 @@ def _build_tools() -> list[dict[str, Any]]:
                 "require_approval": "never",
             }
         )
-    if VECTOR_STORE_ID:
+    # Ignore empty / placeholder values (e.g. "*" mistaken from CORS_ORIGINS)
+    vs_id = VECTOR_STORE_ID.strip()
+    if vs_id and vs_id not in ("*", "none", "null") and len(vs_id) >= 8:
         tools.append(
             {
                 "type": "file_search",
-                "vector_store_ids": [VECTOR_STORE_ID],
+                "vector_store_ids": [vs_id],
                 "max_num_results": 5,
             }
         )
